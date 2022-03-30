@@ -30,15 +30,39 @@ class Scanner(Node):
     detector = cv2.QRCodeDetector()
     
     def camera_inputt(self, message: Image):
-        data = np.array(message.data).reshape(message.height, -1, 3)
+        self.last_message = message
+
+    def scan_last_message(self):
+        data = np.array(self.last_message.data).reshape(self.last_message.height, -1, 3)
 
         qr_text,bbox,straight_qrcode = self.detector.detectAndDecode(data)  
         
-        self.get_logger().info(qr_text)
+        self.get_logger().info(f"Detected QR code: {qr_text}")
+        return qr_text
 
-        cv2.imshow('image', data)
 
-        cv2.waitKey(20)
+    def navigation(self, qr_text):
+        for i in range(10):
+
+            qr_number = 
+
+            goal = PoseStamped()
+            goal.
+            goal.header.stamp.sec = i
+            goal.header.frame_id = 'map'
+
+            goal.pose.position.x = 
+            goal.pose.position.y = 
+            goal.pose.position.z = 
+            goal.pose.orientation.w = 
+
+            if (qr_text == qr_number):
+                time.sleep(5)
+        
+
+
+
+
 
 
     def timer_callback(self, msg):
