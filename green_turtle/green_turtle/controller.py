@@ -15,14 +15,13 @@ class Controller(Node):
 		super().__init__('green_turtle_controller')
 		self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
 		self.scaner = self.create_subscription(String, '/scans', self.scan_received, 10)
-		self.srv = self.create_service(Scan, '/start', self.send_goal)
-
-		self.get_logger().info("wtf")
+		# self.srv = self.create_service(Scan, '/start', self.send_goal)
 
 	def scan_received(self, msg):
+		self.get_logger().info(msg.data)
 		self.last_qr = msg.data
 
-	def send_goal(self, req, response):
+	def send_goal(self):
 		goal_msg = NavigateToPose.Goal()
 
 		pose = PoseStamped()
@@ -36,20 +35,20 @@ class Controller(Node):
 		self._action_client.wait_for_server()
 		self.get_logger().info("After waiting")
 
-		self.movement = self._action_client.send_goal_async(goal_msg)
-
-		self.get_logger().info(f"Scanning")
-
+		self.movement = self._action_client.send_goal_async(goal_msg, self.feedback)
 		while self.last_qr != "0":
-			self.get_logger().info("wait for qr")
+			self.get_logger().info(f"Scanning")
 			
-		return response
+	def feedback(self, fb):
+		self.get_logger().info("feedback")
 
 def main(args=None):
 	rclpy.init(args=args)
-
+	print("A")
 	service = Controller()
-	rclpy.spin(service)
+	Thread(target=rclpy.spin, args=[service])
+	print("B")
+	service.send_goal()
 
 if __name__ == '__main__':
     main()
