@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.publisher import Publisher
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped
@@ -25,52 +26,27 @@ class Scanner(Node):
         self.subscription = self.create_subscription(
         	Image,
         	'/camera/image_raw',
-        	self.camera_inputt,
+        	self.camera_input,
             qos_profile_sensor_data,
             )
 
-        self.srv = self.create_service(Scan, 'scan', self.scan_last_message)
-    
-    def camera_inputt(self, message: Image):
-        self.last_message = message
+        self.srv = self.create_publisher(String, '/scans', 10)
 
-    def scan_last_message(self, request, response: Scan.Response):
-        self.get_logger().info("scanning request")
-        data = np.array(self.last_message.data).reshape(self.last_message.height, -1, 3)
+    srv:Publisher
 
-        qr_text,bbox,straight_qrcode = self.detector.detectAndDecode(data)  
-        response.data = qr_text
-        self.get_logger().info(f"Detected QR code: {qr_text}")
-        return response
+    def camera_input(self, message: Image):
+        data = np.array(message.data).reshape(message.height, -1, 3)
 
+        try:
+            qr_text,bbox,straight_qrcode = self.detector.detectAndDecode(data)  
+        except cv2.error:
+            self.get_logger().warn("Something went wrong with cv2")
+            qr_text = ""
 
-    # def navigation(self, qr_text):
-    #     for i in range(10):
+        s = String()
+        s.data = qr_text
 
-    #         qr_number = 
-
-    #         goal = PoseStamped()
-    #         goal.
-    #         goal.header.stamp.sec = i
-    #         goal.header.frame_id = 'map'
-
-    #         goal.pose.position.x = 
-    #         goal.pose.position.y = 
-    #         goal.pose.position.z = 
-    #         goal.pose.orientation.w = 
-
-    #         if (qr_text == qr_number):
-    #             time.sleep(5)
-        
-
-
-
-
-
-
-    def timer_callback(self, msg):
-        self.turtle_square(msg.sidelength, msg.cw)
-
+        self.srv.publish(s)
 
 def main(args=None):
     rclpy.init(args=args)
