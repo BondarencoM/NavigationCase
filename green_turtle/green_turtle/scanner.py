@@ -35,12 +35,13 @@ class Scanner(Node):
         self.last_message = message
 
     def scan_last_message(self, request, response: Scan.Response):
+        self.get_logger().info("scanning request")
         data = np.array(self.last_message.data).reshape(self.last_message.height, -1, 3)
 
         qr_text,bbox,straight_qrcode = self.detector.detectAndDecode(data)  
-        
+        response.data = qr_text
         self.get_logger().info(f"Detected QR code: {qr_text}")
-        return qr_text
+        return response
 
 
     # def navigation(self, qr_text):
