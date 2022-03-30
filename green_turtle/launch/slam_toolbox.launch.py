@@ -1,6 +1,6 @@
 import os
 from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
+from launch import LaunchDescription, actions, launch_description_sources
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch.conditions import IfCondition
@@ -75,6 +75,10 @@ def generate_launch_description():
         parameters=[{'use_sim_time': use_sim_time}],
         output='screen')
 
+    launch_navigation = actions.IncludeLaunchDescription(
+        launch_description_sources.PythonLaunchDescriptionSource(
+                get_package_share_directory('nav2_bringup') + '/launch/navigation_launch.py'))
+
     ld = LaunchDescription()
     ld.add_action(use_map_resume_arg)
     ld.add_action(param_map_pose_arg)
@@ -83,5 +87,6 @@ def generate_launch_description():
     ld.add_action(slam_node_default)
     ld.add_action(slam_node_resume)
     ld.add_entity(rviz_node)
+    ld.add_entity(launch_navigation)
     
     return ld
