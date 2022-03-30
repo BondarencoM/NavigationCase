@@ -5,41 +5,42 @@ from green_interfaces.srv import Scan
 from nav2_msgs.action import NavigateToPose
 from geometry_msgs.msg import PoseStamped
 
-class ScannerController(Node):
+class Controller(Node):
 
 	def __init__(self):
-		super().__init__('service')
-		self.srv = self.create_service(Scan, 'scan', self.callback)
-		self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+		super().__init__('green_turtle_controller')
+		self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
+		self.scaner = self.create_client(Scan, '/scan')
 
 	def send_goal(self):
 		goal_msg = NavigateToPose.Goal()
 
 		pose = PoseStamped()
-		pose.pose.position.x = 5
-		pose.pose.position.y = 5
-		pose.pose.position.z = 0
+		pose.pose.position.x = -7.0
+		pose.pose.position.y = -4.5
+		pose.pose.position.z = 0.0
 		
 		goal_msg.pose = pose
-
+		self.get_logger().info("Before waiting")
 		self._action_client.wait_for_server()
+		self.get_logger().info("After waiting")
 
-		return self._action_client.send_goal_async(goal_msg)
-	
-	
-	def callback(self, request, response):
-		self.get_logger().info('Request\na: %d' % (request.id))
-		response.data = "aaa"
-		return response
-		
+
+		self._action_client.send_goal_async(goal_msg)
+
+		resp = ""
+		while resp != "5":
+			req = Scan.Request()
+			req.id = 1
+			resp = self.scaner.call(req)
+			self.get_logger().info(f"Scanned {resp}")
+
 def main(args=None):
 	rclpy.init(args=args)
 
-	service = ScannerController()
-
+	service = Controller()
+	service.send_goal()	
 	rclpy.spin(service)
-	service.send_goal()
-	rclpy.shutdown()
 
 
 if __name__ == '__main__':
