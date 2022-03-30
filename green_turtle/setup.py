@@ -37,7 +37,7 @@ setup(
     entry_points={
         'console_scripts': [
             'video = green_turtle.video:main',
-            'controller = green_turtle.controller:main'
+            'controller = green_turtle.controller:main',
             'scanner = green_turtle.scanner:main',
         ],
     },
