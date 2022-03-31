@@ -77,7 +77,7 @@ def generate_launch_description():
 
     launch_navigation = actions.IncludeLaunchDescription(
         launch_description_sources.PythonLaunchDescriptionSource(
-                get_package_share_directory('nav2_bringup') + '/launch/navigation_launch.py'))
+                get_package_share_directory('nav2_bringup') + '/launch/navigation_launch.py'), launch_arguments=[("use_sim_time", "true")])
 
     ld = LaunchDescription()
     ld.add_action(use_map_resume_arg)

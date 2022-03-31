@@ -19,9 +19,8 @@ class Scanner(Node):
     detector = cv2.QRCodeDetector()
 
     def __init__(self):
-        super().__init__('minimal_publisher')
+        super().__init__('green_scanner')
         #self.publisher_ = self.create_publisher(String, 'topic', 10)
-        self.publisher_ = self.create_publisher(PoseStamped, '/goal_pose', 10)
         #self.color = self.create_client(SetPen, 'turtle1/set_pen')
         self.subscription = self.create_subscription(
         	Image,
@@ -29,12 +28,12 @@ class Scanner(Node):
         	self.camera_input,
             qos_profile_sensor_data,
             )
-
         self.srv = self.create_publisher(String, '/scans', 10)
 
     srv:Publisher
 
     def camera_input(self, message: Image):
+        self.get_logger().info("Camera input")
         data = np.array(message.data).reshape(message.height, -1, 3)
 
         try:
