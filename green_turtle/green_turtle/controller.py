@@ -32,6 +32,7 @@ class Controller(Node):
 		super().__init__('green_turtle_controller')
 		self.navigation = self.create_publisher(PoseStamped, '/goal_pose', 10)
 		self.scaner = self.create_subscription(String, '/scans', self.scan_received, 10)
+		# self._actionclient = ActionClient(self, NavigateToPose, '/navigate_to_pose')
 		# self.srv = self.create_service(Scan, '/start', self.send_goal)
 
 	def scan_received(self, msg):
@@ -49,6 +50,10 @@ class Controller(Node):
 
 		self.get_logger().info(f"Sending navigation goar for pos {pose}")
 
+		# self.navigation.publish(pose)
+		goal = NavigateToPose.Goal()
+		goal.pose = pose
+		
 		self.navigation.publish(pose)
 
 	def check_qr(self, expected):

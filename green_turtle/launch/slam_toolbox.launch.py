@@ -77,7 +77,7 @@ def generate_launch_description():
 
     launch_navigation = actions.IncludeLaunchDescription(
         launch_description_sources.PythonLaunchDescriptionSource(
-                get_package_share_directory('nav2_bringup') + '/launch/navigation_launch.py'), launch_arguments=[("use_sim_time", "true")])
+                get_package_share_directory('turtlebot3_navigation2') + '/launch/navigation2.launch.py'), launch_arguments=[("use_sim_time", "True"), ("map", param_map_path)])
 
     ld = LaunchDescription()
     ld.add_action(use_map_resume_arg)
@@ -86,7 +86,7 @@ def generate_launch_description():
     ld.add_action(use_sim_time_arg)
     ld.add_action(slam_node_default)
     ld.add_action(slam_node_resume)
-    ld.add_entity(rviz_node)
+    # ld.add_entity(rviz_node)
     ld.add_entity(launch_navigation)
     
     return ld
