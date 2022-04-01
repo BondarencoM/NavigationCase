@@ -36,6 +36,10 @@ class Scanner(Node):
         self.get_logger().info("Camera input")
         data = np.array(message.data).reshape(message.height, -1, 3)
 
+        hsv = cv2.cvtColor(data, cv2.COLOR_BGR2HSV)
+        hsv[:,:,2] += 60
+        data = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
         try:
             qr_text,bbox,straight_qrcode = self.detector.detectAndDecode(data)  
         except cv2.error:
