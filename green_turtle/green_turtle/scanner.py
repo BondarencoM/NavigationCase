@@ -20,8 +20,6 @@ class Scanner(Node):
 
     def __init__(self):
         super().__init__('green_scanner')
-        #self.publisher_ = self.create_publisher(String, 'topic', 10)
-        #self.color = self.create_client(SetPen, 'turtle1/set_pen')
         self.subscription = self.create_subscription(
         	Image,
         	'/camera/image_raw',
@@ -33,22 +31,28 @@ class Scanner(Node):
     srv:Publisher
 
     def camera_input(self, message: Image):
-        self.get_logger().info("Camera input")
+        self.get_logger().info("Received camera input")
+
+        # Transforming flat array into shape (height, width, RGB)
         data = np.array(message.data).reshape(message.height, -1, 3)
 
+        # Transforming the image to HSV to increase brightness
+        # This helps with some QR codes that are too dark
         hsv = cv2.cvtColor(data, cv2.COLOR_BGR2HSV)
         hsv[:,:,2] += 60
         data = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
+        # Try to detect a QR code
         try:
             qr_text,bbox,straight_qrcode = self.detector.detectAndDecode(data)  
         except cv2.error:
             self.get_logger().warn("Something went wrong with cv2")
             qr_text = ""
 
+        # Publish the value of the QR code 
+        # or an empty string if no QR code is detected
         s = String()
         s.data = qr_text
-
         self.srv.publish(s)
 
 def main(args=None):
